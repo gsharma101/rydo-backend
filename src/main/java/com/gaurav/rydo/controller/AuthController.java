@@ -1,5 +1,7 @@
 package com.gaurav.rydo.controller;
 
+import com.gaurav.rydo.dto.LoginRequestDto;
+import com.gaurav.rydo.dto.LoginResponseDto;
 import com.gaurav.rydo.dto.SignupRequestDto;
 import com.gaurav.rydo.dto.SignupResponseDto;
 import com.gaurav.rydo.service.AuthService;
@@ -24,5 +26,15 @@ public class AuthController {
         SignupResponseDto response = authService.signup(signupRequestDto);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(
+            @Valid @RequestBody LoginRequestDto loginRequestDto
+    ) {
+
+        LoginResponseDto response = authService.login(loginRequestDto);
+
+        return ResponseEntity.ok(response);
     }
 }
