@@ -1,9 +1,12 @@
 package com.gaurav.rydo.service;
 
+import com.gaurav.rydo.dto.LoginRequestDto;
+import com.gaurav.rydo.dto.LoginResponseDto;
 import com.gaurav.rydo.dto.SignupRequestDto;
 import com.gaurav.rydo.dto.SignupResponseDto;
 import com.gaurav.rydo.entity.User;
 import com.gaurav.rydo.repository.UserRepository;
+import com.gaurav.rydo.security.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +18,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Transactional
     public SignupResponseDto signup(SignupRequestDto signupRequestDto) {
@@ -49,6 +53,32 @@ public class AuthService {
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole())
                 .message("User registered successfully")
+                .build();
+    }
+
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+
+        // Find user by email
+        User user = userRepository.findByEmail(loginRequestDto.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        // Verify password
+        boolean isPasswordMatched = passwordEncoder.matches(
+                loginRequestDto.getPassword(),
+                user.getPassword()
+        );
+
+        if (!isPasswordMatched) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        // Generate JWT token
+        String token = jwtService.generateToken(user.getEmail());
+
+        // Return response
+        return LoginResponseDto.builder()
+                .token(token)
+                .message("Login successful")
                 .build();
     }
 }
