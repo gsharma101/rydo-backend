@@ -1,4 +1,4 @@
-package com.gaurav.rydo.repository;
+package com.gaurav.rydo.repository.user;
 
 import com.gaurav.rydo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

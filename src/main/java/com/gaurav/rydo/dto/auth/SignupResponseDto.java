@@ -1,4 +1,4 @@
-package com.gaurav.rydo.dto;
+package com.gaurav.rydo.dto.auth;
 
 import com.gaurav.rydo.entity.enums.Role;
 import lombok.Builder;
