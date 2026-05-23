@@ -1,9 +1,12 @@
-package com.gaurav.rydo.service.user;
+package com.gaurav.rydo.service;
 
-import com.gaurav.rydo.dto.auth.SignupRequestDto;
-import com.gaurav.rydo.dto.auth.SignupResponseDto;
+import com.gaurav.rydo.dto.LoginRequestDto;
+import com.gaurav.rydo.dto.LoginResponseDto;
+import com.gaurav.rydo.dto.SignupRequestDto;
+import com.gaurav.rydo.dto.SignupResponseDto;
 import com.gaurav.rydo.entity.User;
-import com.gaurav.rydo.repository.user.UserRepository;
+import com.gaurav.rydo.repository.UserRepository;
+import com.gaurav.rydo.security.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
