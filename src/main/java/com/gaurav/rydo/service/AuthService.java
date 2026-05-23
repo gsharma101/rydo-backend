@@ -7,6 +7,7 @@ import com.gaurav.rydo.dto.SignupResponseDto;
 import com.gaurav.rydo.entity.User;
 import com.gaurav.rydo.repository.UserRepository;
 import com.gaurav.rydo.security.JwtService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    @Transactional
     public SignupResponseDto signup(SignupRequestDto signupRequestDto) {
 
         // Check if email already exists
