@@ -1,7 +1,7 @@
 package com.gaurav.rydo.security;
 
 import com.gaurav.rydo.entity.User;
-import com.gaurav.rydo.repository.UserRepository;
+import com.gaurav.rydo.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
