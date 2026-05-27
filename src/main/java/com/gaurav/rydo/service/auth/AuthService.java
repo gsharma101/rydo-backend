@@ -1,7 +1,7 @@
 package com.gaurav.rydo.service.auth;
 
-import com.gaurav.rydo.dto.LoginRequestDto;
-import com.gaurav.rydo.dto.LoginResponseDto;
+import com.gaurav.rydo.dto.auth.LoginRequestDto;
+import com.gaurav.rydo.dto.auth.LoginResponseDto;
 import com.gaurav.rydo.dto.auth.SignupRequestDto;
 import com.gaurav.rydo.dto.auth.SignupResponseDto;
 import com.gaurav.rydo.entity.User;
