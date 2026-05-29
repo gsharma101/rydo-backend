@@ -83,4 +83,13 @@ public class RideController {
                 rideService.getDriverRides()
         );
     }
+
+    @GetMapping("/active")
+    public ResponseEntity<RideResponseDto> getActiveRide() {
+
+        RideResponseDto response =
+                rideService.getActiveRide();
+
+        return ResponseEntity.ok(response);
+    }
 }

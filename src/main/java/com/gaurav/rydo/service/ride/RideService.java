@@ -257,4 +257,32 @@ public class RideService {
                 .requestedAt(ride.getRequestedAt())
                 .build();
     }
+
+    public RideResponseDto getActiveRide() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User rider = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        List<RideStatus> activeStatuses = List.of(
+                RideStatus.REQUESTED,
+                RideStatus.ACCEPTED,
+                RideStatus.STARTED
+        );
+
+        Ride ride = rideRepository
+                .findFirstByRiderAndStatusIn(
+                        rider,
+                        activeStatuses
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("No active ride found"));
+
+        return mapToResponse(ride);
+    }
 }
