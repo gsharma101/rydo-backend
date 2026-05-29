@@ -1,5 +1,6 @@
 package com.gaurav.rydo.service.ride;
 
+import com.gaurav.rydo.dto.ride.RideHistoryResponseDto;
 import com.gaurav.rydo.dto.ride.RideRequestDto;
 import com.gaurav.rydo.dto.ride.RideResponseDto;
 import com.gaurav.rydo.entity.Driver;
@@ -189,6 +190,68 @@ public class RideService {
                 .pickupLongitude(ride.getPickupLongitude())
                 .dropLatitude(ride.getDropLatitude())
                 .dropLongitude(ride.getDropLongitude())
+                .fare(ride.getFare())
+                .status(ride.getStatus())
+                .requestedAt(ride.getRequestedAt())
+                .build();
+    }
+
+    public List<RideHistoryResponseDto> getMyRides() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User rider = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        List<Ride> rides = rideRepository.findByRider(rider);
+
+        return rides.stream()
+                .map(this::mapToHistoryResponse)
+                .toList();
+    }
+
+    public List<RideHistoryResponseDto> getDriverRides() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        Driver driver = driverRepository.findByUser(user)
+                .orElseThrow(() ->
+                        new RuntimeException("Driver not found"));
+
+        List<Ride> rides = rideRepository.findByDriver(driver);
+
+        return rides.stream()
+                .map(this::mapToHistoryResponse)
+                .toList();
+    }
+
+    private RideHistoryResponseDto mapToHistoryResponse(
+            Ride ride
+    ) {
+
+        return RideHistoryResponseDto.builder()
+                .rideId(ride.getId())
+                .riderName(
+                        ride.getRider().getFirstName()
+                                + " "
+                                + ride.getRider().getLastName()
+                )
+                .driverName(
+                        ride.getDriver().getUser().getFirstName()
+                                + " "
+                                + ride.getDriver().getUser().getLastName()
+                )
                 .fare(ride.getFare())
                 .status(ride.getStatus())
                 .requestedAt(ride.getRequestedAt())

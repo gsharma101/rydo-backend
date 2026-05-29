@@ -1,5 +1,6 @@
 package com.gaurav.rydo.controller.ride;
 
+import com.gaurav.rydo.dto.ride.RideHistoryResponseDto;
 import com.gaurav.rydo.dto.ride.RideRequestDto;
 import com.gaurav.rydo.dto.ride.RideResponseDto;
 import com.gaurav.rydo.service.ride.RideService;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/rides")
@@ -63,5 +66,21 @@ public class RideController {
                 rideService.completeRide(rideId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/my-rides")
+    public ResponseEntity<List<RideHistoryResponseDto>> getMyRides() {
+
+        return ResponseEntity.ok(
+                rideService.getMyRides()
+        );
+    }
+
+    @GetMapping("/driver-rides")
+    public ResponseEntity<List<RideHistoryResponseDto>> getDriverRides() {
+
+        return ResponseEntity.ok(
+                rideService.getDriverRides()
+        );
     }
 }
