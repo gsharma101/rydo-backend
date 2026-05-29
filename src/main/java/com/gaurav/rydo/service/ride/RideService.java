@@ -134,6 +134,22 @@ public class RideService {
                 loggedInDriver
         );
 
+        Ride activeRide = rideRepository
+                .findFirstByDriverAndStatusIn(
+                        loggedInDriver,
+                        List.of(
+                                RideStatus.ACCEPTED,
+                                RideStatus.STARTED
+                        )
+                )
+                .orElse(null);
+
+        if (activeRide != null) {
+            throw new ApiException(
+                    "Driver already has an active ride"
+            );
+        }
+
         ride.setStatus(RideStatus.ACCEPTED);
 
         Ride updatedRide = rideRepository.save(ride);
@@ -527,5 +543,26 @@ public class RideService {
         return rides.stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    public RideResponseDto getActiveDriverRide() {
+
+        Driver driver = getLoggedInDriver();
+
+        Ride ride = rideRepository
+                .findFirstByDriverAndStatusIn(
+                        driver,
+                        List.of(
+                                RideStatus.ACCEPTED,
+                                RideStatus.STARTED
+                        )
+                )
+                .orElseThrow(() ->
+                        new ApiException(
+                                "No active ride found"
+                        )
+                );
+
+        return mapToResponse(ride);
     }
 }

@@ -1,12 +1,11 @@
 package com.gaurav.rydo.service.driver;
 
-import com.gaurav.rydo.dto.driver.DriverAvailabilityUpdateRequestDto;
-import com.gaurav.rydo.dto.driver.DriverLocationUpdateRequestDto;
-import com.gaurav.rydo.dto.driver.DriverRegistrationRequestDto;
-import com.gaurav.rydo.dto.driver.DriverResponseDto;
+import com.gaurav.rydo.dto.driver.*;
 import com.gaurav.rydo.entity.Driver;
 import com.gaurav.rydo.entity.User;
+import com.gaurav.rydo.entity.enums.RideStatus;
 import com.gaurav.rydo.repository.driver.DriverRepository;
+import com.gaurav.rydo.repository.ride.RideRepository;
 import com.gaurav.rydo.repository.user.UserRepository;
 import com.gaurav.rydo.util.DistanceUtil;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +21,7 @@ public class DriverService {
 
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
+    private final RideRepository rideRepository;
 
     public DriverResponseDto registerDriver(
             DriverRegistrationRequestDto requestDto
@@ -248,5 +248,50 @@ public class DriverService {
                 )
 
                 .toList();
+    }
+
+    public DriverStatsResponseDto getDriverStats() {
+
+        Driver driver = getLoggedInDriver();
+
+        long totalRides =
+                rideRepository.countByDriver(driver);
+
+        long completedRides =
+                rideRepository.countByDriverAndStatus(
+                        driver,
+                        RideStatus.COMPLETED
+                );
+
+        long cancelledRides =
+                rideRepository.countByDriverAndStatus(
+                        driver,
+                        RideStatus.CANCELLED
+                );
+
+        return DriverStatsResponseDto.builder()
+                .totalRides(totalRides)
+                .completedRides(completedRides)
+                .cancelledRides(cancelledRides)
+                .averageRating(driver.getRating())
+                .build();
+    }
+
+    private Driver getLoggedInDriver() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        return driverRepository.findByUser(user)
+                .orElseThrow(() ->
+                        new RuntimeException("Driver not found"));
     }
 }

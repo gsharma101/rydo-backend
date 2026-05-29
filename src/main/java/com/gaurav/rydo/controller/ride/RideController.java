@@ -157,4 +157,14 @@ public class RideController {
                 rideService.getPendingRides()
         );
     }
+
+    @GetMapping("/active-driver-ride")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<RideResponseDto>
+    getActiveDriverRide() {
+
+        return ResponseEntity.ok(
+                rideService.getActiveDriverRide()
+        );
+    }
 }

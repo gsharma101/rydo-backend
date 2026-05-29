@@ -1,9 +1,6 @@
 package com.gaurav.rydo.controller.driver;
 
-import com.gaurav.rydo.dto.driver.DriverAvailabilityUpdateRequestDto;
-import com.gaurav.rydo.dto.driver.DriverLocationUpdateRequestDto;
-import com.gaurav.rydo.dto.driver.DriverRegistrationRequestDto;
-import com.gaurav.rydo.dto.driver.DriverResponseDto;
+import com.gaurav.rydo.dto.driver.*;
 import com.gaurav.rydo.service.driver.DriverService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -87,5 +84,15 @@ public class DriverController {
                 );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<DriverStatsResponseDto>
+    getDriverStats() {
+
+        return ResponseEntity.ok(
+                driverService.getDriverStats()
+        );
     }
 }
