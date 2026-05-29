@@ -1,5 +1,6 @@
 package com.gaurav.rydo.service.ride;
 
+import com.gaurav.rydo.dto.ride.RateRideRequestDto;
 import com.gaurav.rydo.dto.ride.RideHistoryResponseDto;
 import com.gaurav.rydo.dto.ride.RideRequestDto;
 import com.gaurav.rydo.dto.ride.RideResponseDto;
@@ -7,6 +8,7 @@ import com.gaurav.rydo.entity.Driver;
 import com.gaurav.rydo.entity.Ride;
 import com.gaurav.rydo.entity.enums.RideStatus;
 import com.gaurav.rydo.entity.User;
+import com.gaurav.rydo.exception.ApiException;
 import com.gaurav.rydo.repository.driver.DriverRepository;
 import com.gaurav.rydo.repository.ride.RideRepository;
 import com.gaurav.rydo.repository.user.UserRepository;
@@ -282,6 +284,93 @@ public class RideService {
                 )
                 .orElseThrow(() ->
                         new RuntimeException("No active ride found"));
+
+        return mapToResponse(ride);
+    }
+
+    public RideResponseDto cancelRide(Long rideId) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new ApiException("Ride not found"));
+
+        // Only REQUESTED and ACCEPTED rides can be cancelled
+        if (ride.getStatus() == RideStatus.STARTED ||
+                ride.getStatus() == RideStatus.COMPLETED) {
+
+            throw new ApiException(
+                    "Ride cannot be cancelled in current state"
+            );
+        }
+
+        ride.setStatus(RideStatus.CANCELLED);
+
+        // Make driver available again
+        if (ride.getDriver() != null) {
+
+            Driver driver = ride.getDriver();
+
+            driver.setIsAvailable(true);
+
+            driverRepository.save(driver);
+        }
+
+        Ride updatedRide = rideRepository.save(ride);
+
+        return mapToResponse(updatedRide);
+    }
+
+    public RideResponseDto getRide(Long rideId) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new ApiException("Ride not found"));
+
+        return mapToResponse(ride);
+    }
+
+    public RideResponseDto rateRide(
+            Long rideId,
+            RateRideRequestDto requestDto
+    ) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new ApiException("Ride not found"));
+
+        if (ride.getStatus() != RideStatus.COMPLETED) {
+            throw new ApiException(
+                    "Only completed rides can be rated"
+            );
+        }
+
+        Driver driver = ride.getDriver();
+
+        Integer totalRatings =
+                driver.getTotalRatings() == null
+                        ? 0
+                        : driver.getTotalRatings();
+
+        Integer totalRatingCount =
+                driver.getTotalRatingCount() == null
+                        ? 0
+                        : driver.getTotalRatingCount();
+
+        driver.setTotalRatings(
+                totalRatings + requestDto.getRating()
+        );
+
+        driver.setTotalRatingCount(
+                totalRatingCount + 1
+        );
+
+        double averageRating =
+                (double) driver.getTotalRatings()
+                        / driver.getTotalRatingCount();
+
+        driver.setRating(averageRating);
+
+        driverRepository.save(driver);
 
         return mapToResponse(ride);
     }

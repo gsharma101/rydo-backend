@@ -1,5 +1,6 @@
 package com.gaurav.rydo.controller.ride;
 
+import com.gaurav.rydo.dto.ride.RateRideRequestDto;
 import com.gaurav.rydo.dto.ride.RideHistoryResponseDto;
 import com.gaurav.rydo.dto.ride.RideRequestDto;
 import com.gaurav.rydo.dto.ride.RideResponseDto;
@@ -89,6 +90,44 @@ public class RideController {
 
         RideResponseDto response =
                 rideService.getActiveRide();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{rideId}/cancel")
+    public ResponseEntity<RideResponseDto> cancelRide(
+            @PathVariable Long rideId
+    ) {
+
+        RideResponseDto response =
+                rideService.cancelRide(rideId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{rideId}")
+    public ResponseEntity<RideResponseDto> getRide(
+            @PathVariable Long rideId
+    ) {
+
+        RideResponseDto response =
+                rideService.getRide(rideId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{rideId}/rate")
+    public ResponseEntity<RideResponseDto> rateRide(
+            @PathVariable Long rideId,
+            @Valid @RequestBody
+            RateRideRequestDto requestDto
+    ) {
+
+        RideResponseDto response =
+                rideService.rateRide(
+                        rideId,
+                        requestDto
+                );
 
         return ResponseEntity.ok(response);
     }

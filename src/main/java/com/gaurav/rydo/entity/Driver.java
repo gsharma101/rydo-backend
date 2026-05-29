@@ -39,6 +39,12 @@ public class Driver {
     @Builder.Default
     private Double rating = 0.0;
 
+    @Builder.Default
+    private Integer totalRatings = 0;
+
+    @Builder.Default
+    private Integer totalRatingCount = 0;
+
     private Double currentLatitude;
 
     private Double currentLongitude;
