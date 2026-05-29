@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class DriverController {
 
     private final DriverService driverService;
 
+    @PreAuthorize("hasRole('DRIVER')")
     @PostMapping("/register")
     public ResponseEntity<DriverResponseDto> registerDriver(
             @Valid @RequestBody DriverRegistrationRequestDto requestDto
@@ -31,6 +33,7 @@ public class DriverController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('DRIVER')")
     @GetMapping("/me")
     public ResponseEntity<DriverResponseDto> getCurrentDriver() {
 
@@ -40,6 +43,7 @@ public class DriverController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('DRIVER')")
     @PatchMapping("/availability")
     public ResponseEntity<DriverResponseDto> updateAvailability(
             @Valid @RequestBody
@@ -52,6 +56,7 @@ public class DriverController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('DRIVER')")
     @PatchMapping("/location")
     public ResponseEntity<DriverResponseDto> updateLocation(
             @Valid @RequestBody

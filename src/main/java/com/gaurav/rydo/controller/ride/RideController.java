@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class RideController {
 
     private final RideService rideService;
 
+    @PreAuthorize("hasRole('RIDER')")
     @PostMapping("/request")
     public ResponseEntity<RideResponseDto> requestRide(
 
@@ -69,6 +71,7 @@ public class RideController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('RIDER')")
     @GetMapping("/my-rides")
     public ResponseEntity<List<RideHistoryResponseDto>> getMyRides() {
 
@@ -85,6 +88,7 @@ public class RideController {
         );
     }
 
+    @PreAuthorize("hasRole('RIDER')")
     @GetMapping("/active")
     public ResponseEntity<RideResponseDto> getActiveRide() {
 

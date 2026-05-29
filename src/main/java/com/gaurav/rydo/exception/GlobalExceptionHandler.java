@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -21,6 +22,21 @@ public class GlobalExceptionHandler {
                     Map.of(
                             "message",
                             ex.getMessage()
+                    )
+            );
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<Map<String, String>> handleAccessDeniedException(
+          AccessDeniedException ex
+  ) {
+
+    return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(
+                    Map.of(
+                            "message",
+                            "Access Denied"
                     )
             );
   }
