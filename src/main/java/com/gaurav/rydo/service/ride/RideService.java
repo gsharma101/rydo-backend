@@ -465,4 +465,52 @@ public class RideService {
             );
         }
     }
+
+    public RideResponseDto rejectRide(Long rideId) {
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->
+                        new ApiException("Ride not found"));
+
+        Driver loggedInDriver = getLoggedInDriver();
+
+        validateDriverOwnership(
+                ride,
+                loggedInDriver
+        );
+
+        if (ride.getStatus() != RideStatus.REQUESTED) {
+
+            throw new ApiException(
+                    "Only requested rides can be rejected"
+            );
+        }
+
+        loggedInDriver.setIsAvailable(true);
+
+        driverRepository.save(loggedInDriver);
+
+        List<Driver> availableDrivers =
+                driverRepository.findByIsAvailableTrue();
+
+        Driver newDriver = availableDrivers.stream()
+                .filter(driver ->
+                        !driver.getId().equals(
+                                loggedInDriver.getId()
+                        )
+                )
+                .findFirst()
+                .orElseThrow(() ->
+                        new ApiException(
+                                "No alternative driver available"
+                        )
+                );
+
+        ride.setDriver(newDriver);
+
+        Ride updatedRide =
+                rideRepository.save(ride);
+
+        return mapToResponse(updatedRide);
+    }
 }

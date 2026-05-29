@@ -135,4 +135,16 @@ public class RideController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/{rideId}/reject")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<RideResponseDto> rejectRide(
+            @PathVariable Long rideId
+    ) {
+
+        RideResponseDto response =
+                rideService.rejectRide(rideId);
+
+        return ResponseEntity.ok(response);
+    }
 }
