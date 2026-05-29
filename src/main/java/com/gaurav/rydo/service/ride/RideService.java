@@ -127,6 +127,13 @@ public class RideService {
                 .orElseThrow(() ->
                         new RuntimeException("Ride not found"));
 
+        Driver loggedInDriver = getLoggedInDriver();
+
+        validateDriverOwnership(
+                ride,
+                loggedInDriver
+        );
+
         ride.setStatus(RideStatus.ACCEPTED);
 
         Ride updatedRide = rideRepository.save(ride);
@@ -139,6 +146,13 @@ public class RideService {
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() ->
                         new RuntimeException("Ride not found"));
+
+        Driver loggedInDriver = getLoggedInDriver();
+
+        validateDriverOwnership(
+                ride,
+                loggedInDriver
+        );
 
         ride.setStatus(RideStatus.STARTED);
 
@@ -154,6 +168,13 @@ public class RideService {
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() ->
                         new RuntimeException("Ride not found"));
+
+        Driver loggedInDriver = getLoggedInDriver();
+
+        validateDriverOwnership(
+                ride,
+                loggedInDriver
+        );
 
         ride.setStatus(RideStatus.COMPLETED);
 
@@ -294,6 +315,13 @@ public class RideService {
                 .orElseThrow(() ->
                         new ApiException("Ride not found"));
 
+        User loggedInUser = getLoggedInUser();
+
+        validateRiderOwnership(
+                ride,
+                loggedInUser
+        );
+
         // Only REQUESTED and ACCEPTED rides can be cancelled
         if (ride.getStatus() == RideStatus.STARTED ||
                 ride.getStatus() == RideStatus.COMPLETED) {
@@ -338,6 +366,13 @@ public class RideService {
                 .orElseThrow(() ->
                         new ApiException("Ride not found"));
 
+        User loggedInUser = getLoggedInUser();
+
+        validateRiderOwnership(
+                ride,
+                loggedInUser
+        );
+
         if (ride.getStatus() != RideStatus.COMPLETED) {
             throw new ApiException(
                     "Only completed rides can be rated"
@@ -373,5 +408,61 @@ public class RideService {
         driverRepository.save(driver);
 
         return mapToResponse(ride);
+    }
+
+    private Driver getLoggedInDriver() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ApiException("User not found"));
+
+        return driverRepository.findByUser(user)
+                .orElseThrow(() ->
+                        new ApiException("Driver not found"));
+    }
+
+    private void validateDriverOwnership(
+            Ride ride,
+            Driver loggedInDriver
+    ) {
+
+        if (!ride.getDriver().getId()
+                .equals(loggedInDriver.getId())) {
+
+            throw new ApiException(
+                    "You are not assigned to this ride"
+            );
+        }
+    }
+
+    private User getLoggedInUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ApiException("User not found"));
+    }
+
+    private void validateRiderOwnership(
+            Ride ride,
+            User loggedInUser
+    ) {
+
+        if (!ride.getRider().getId()
+                .equals(loggedInUser.getId())) {
+
+            throw new ApiException(
+                    "You are not the owner of this ride"
+            );
+        }
     }
 }
