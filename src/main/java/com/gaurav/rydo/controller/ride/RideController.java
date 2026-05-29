@@ -147,4 +147,14 @@ public class RideController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<List<RideResponseDto>>
+    getPendingRides() {
+
+        return ResponseEntity.ok(
+                rideService.getPendingRides()
+        );
+    }
 }

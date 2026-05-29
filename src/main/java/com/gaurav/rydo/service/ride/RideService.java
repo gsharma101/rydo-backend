@@ -513,4 +513,19 @@ public class RideService {
 
         return mapToResponse(updatedRide);
     }
+
+    public List<RideResponseDto> getPendingRides() {
+
+        Driver loggedInDriver = getLoggedInDriver();
+
+        List<Ride> rides =
+                rideRepository.findByDriverAndStatus(
+                        loggedInDriver,
+                        RideStatus.REQUESTED
+                );
+
+        return rides.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 }

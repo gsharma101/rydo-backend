@@ -1,7 +1,9 @@
 package com.gaurav.rydo.repository.driver;
 
 import com.gaurav.rydo.entity.Driver;
+import com.gaurav.rydo.entity.Ride;
 import com.gaurav.rydo.entity.User;
+import com.gaurav.rydo.entity.enums.RideStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
