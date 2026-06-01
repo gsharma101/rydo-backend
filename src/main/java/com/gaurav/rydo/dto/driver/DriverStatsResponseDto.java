@@ -14,4 +14,6 @@ public class DriverStatsResponseDto {
     private Long cancelledRides;
 
     private Double averageRating;
+
+    private Double totalEarnings;
 }

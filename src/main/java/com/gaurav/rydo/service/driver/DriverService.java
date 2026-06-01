@@ -5,6 +5,7 @@ import com.gaurav.rydo.entity.Driver;
 import com.gaurav.rydo.entity.User;
 import com.gaurav.rydo.entity.enums.RideStatus;
 import com.gaurav.rydo.repository.driver.DriverRepository;
+import com.gaurav.rydo.repository.payment.PaymentRepository;
 import com.gaurav.rydo.repository.ride.RideRepository;
 import com.gaurav.rydo.repository.user.UserRepository;
 import com.gaurav.rydo.util.DistanceUtil;
@@ -22,6 +23,7 @@ public class DriverService {
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
     private final RideRepository rideRepository;
+    private final PaymentRepository paymentRepository;
 
     public DriverResponseDto registerDriver(
             DriverRegistrationRequestDto requestDto
@@ -257,6 +259,9 @@ public class DriverService {
         long totalRides =
                 rideRepository.countByDriver(driver);
 
+        Double totalEarnings =
+                paymentRepository.getTotalEarningsByDriver(driver);
+
         long completedRides =
                 rideRepository.countByDriverAndStatus(
                         driver,
@@ -274,6 +279,7 @@ public class DriverService {
                 .completedRides(completedRides)
                 .cancelledRides(cancelledRides)
                 .averageRating(driver.getRating())
+                .totalEarnings(totalEarnings)
                 .build();
     }
 
