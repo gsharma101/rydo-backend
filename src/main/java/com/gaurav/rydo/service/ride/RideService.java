@@ -13,6 +13,7 @@ import com.gaurav.rydo.repository.driver.DriverRepository;
 import com.gaurav.rydo.repository.ride.RideRepository;
 import com.gaurav.rydo.repository.user.UserRepository;
 import com.gaurav.rydo.util.DistanceUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,6 +34,7 @@ public class RideService {
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public RideResponseDto requestRide(
             RideRequestDto requestDto
     ) {
@@ -78,12 +80,14 @@ public class RideService {
         driverRepository.save(nearestDriver);
 
         // Simple fare calculation
-        double fare = DistanceUtil.calculateDistance(
+        double distanceInKm = DistanceUtil.calculateDistance(
                 requestDto.getPickupLatitude(),
                 requestDto.getPickupLongitude(),
                 requestDto.getDropLatitude(),
                 requestDto.getDropLongitude()
-        ) * 15;
+        );
+
+        double fare = distanceInKm * 15;
 
         // Create ride
         Ride ride = Ride.builder()
@@ -93,6 +97,7 @@ public class RideService {
                 .pickupLongitude(requestDto.getPickupLongitude())
                 .dropLatitude(requestDto.getDropLatitude())
                 .dropLongitude(requestDto.getDropLongitude())
+                .distanceInKm(distanceInKm)
                 .fare(fare)
                 .status(RideStatus.REQUESTED)
                 .build();
@@ -115,12 +120,14 @@ public class RideService {
                 .pickupLongitude(savedRide.getPickupLongitude())
                 .dropLatitude(savedRide.getDropLatitude())
                 .dropLongitude(savedRide.getDropLongitude())
+                .distanceInKm(savedRide.getDistanceInKm())
                 .fare(savedRide.getFare())
                 .status(savedRide.getStatus())
                 .requestedAt(savedRide.getRequestedAt())
                 .build();
     }
 
+    @Transactional
     public RideResponseDto acceptRide(Long rideId) {
 
         Ride ride = rideRepository.findById(rideId)
@@ -157,6 +164,7 @@ public class RideService {
         return mapToResponse(updatedRide);
     }
 
+    @Transactional
     public RideResponseDto startRide(Long rideId) {
 
         Ride ride = rideRepository.findById(rideId)
@@ -179,6 +187,7 @@ public class RideService {
         return mapToResponse(updatedRide);
     }
 
+    @Transactional
     public RideResponseDto completeRide(Long rideId) {
 
         Ride ride = rideRepository.findById(rideId)
@@ -325,6 +334,7 @@ public class RideService {
         return mapToResponse(ride);
     }
 
+    @Transactional
     public RideResponseDto cancelRide(Long rideId) {
 
         Ride ride = rideRepository.findById(rideId)
@@ -482,6 +492,7 @@ public class RideService {
         }
     }
 
+    @Transactional
     public RideResponseDto rejectRide(Long rideId) {
 
         Ride ride = rideRepository.findById(rideId)

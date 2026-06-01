@@ -41,7 +41,11 @@ public class Ride {
     @Column(nullable = false)
     private Double dropLongitude;
 
+    @Column
     private Double fare;
+
+    @Column
+    private Double distanceInKm;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,6 +53,7 @@ public class Ride {
 
     @Builder.Default
     private LocalDateTime requestedAt = LocalDateTime.now();
+
 
     private LocalDateTime startedAt;
 

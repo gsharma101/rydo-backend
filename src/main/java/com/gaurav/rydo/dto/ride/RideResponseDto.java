@@ -28,6 +28,8 @@ public class RideResponseDto {
 
     private Double fare;
 
+    private Double distanceInKm;
+
     private RideStatus status;
 
     private LocalDateTime requestedAt;
