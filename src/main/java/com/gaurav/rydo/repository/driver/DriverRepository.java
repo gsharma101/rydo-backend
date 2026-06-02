@@ -5,6 +5,7 @@ import com.gaurav.rydo.entity.Ride;
 import com.gaurav.rydo.entity.User;
 import com.gaurav.rydo.entity.enums.RideStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,4 +19,24 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     boolean existsByVehicleNumber(String vehicleNumber);
 
     List<Driver> findByIsAvailableTrue();
+
+    @Query(value = """
+    SELECT *
+    FROM drivers d
+    WHERE d.is_available = true
+    AND ST_DWithin(
+        d.location::geography,
+        ST_SetSRID(
+            ST_MakePoint(:longitude, :latitude),
+            4326
+        )::geography,
+        :radiusInMeters
+    )
+    """,
+            nativeQuery = true)
+    List<Driver> findNearbyDrivers(
+            Double latitude,
+            Double longitude,
+            Double radiusInMeters
+    );
 }

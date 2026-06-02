@@ -3,6 +3,7 @@ package com.gaurav.rydo.entity;
 import com.gaurav.rydo.entity.enums.VehicleType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.locationtech.jts.geom.Point;
 
 @Entity
 @Table(name = "drivers")
@@ -48,4 +49,7 @@ public class Driver {
     private Double currentLatitude;
 
     private Double currentLongitude;
+
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point location;
 }

@@ -8,11 +8,13 @@ import com.gaurav.rydo.repository.driver.DriverRepository;
 import com.gaurav.rydo.repository.payment.PaymentRepository;
 import com.gaurav.rydo.repository.ride.RideRepository;
 import com.gaurav.rydo.repository.user.UserRepository;
-import com.gaurav.rydo.util.DistanceUtil;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Coordinate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.locationtech.jts.geom.GeometryFactory;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class DriverService {
     private final UserRepository userRepository;
     private final RideRepository rideRepository;
     private final PaymentRepository paymentRepository;
+    private final GeometryFactory geometryFactory;
 
     public DriverResponseDto registerDriver(
             DriverRegistrationRequestDto requestDto
@@ -180,8 +183,22 @@ public class DriverService {
                         new RuntimeException("Driver not found"));
 
         // Update location
-        driver.setCurrentLatitude(requestDto.getLatitude());
-        driver.setCurrentLongitude(requestDto.getLongitude());
+        driver.setCurrentLatitude(
+                requestDto.getLatitude()
+        );
+
+        driver.setCurrentLongitude(
+                requestDto.getLongitude()
+        );
+
+        Point point = geometryFactory.createPoint(
+                new Coordinate(
+                        requestDto.getLongitude(),
+                        requestDto.getLatitude()
+                )
+        );
+
+        driver.setLocation(point);
 
         // Save updated driver
         Driver updatedDriver = driverRepository.save(driver);
@@ -209,29 +226,14 @@ public class DriverService {
             Double radius
     ) {
 
-        // Fetch available drivers
-        List<Driver> availableDrivers =
-                driverRepository.findByIsAvailableTrue();
+        List<Driver> nearbyDrivers =
+                driverRepository.findNearbyDrivers(
+                        latitude,
+                        longitude,
+                        radius * 1000
+                );
 
-        // Filter nearby drivers
-        return availableDrivers.stream()
-
-                .filter(driver ->
-                        driver.getCurrentLatitude() != null
-                                && driver.getCurrentLongitude() != null
-                )
-
-                .filter(driver -> {
-
-                    double distance = DistanceUtil.calculateDistance(
-                            latitude,
-                            longitude,
-                            driver.getCurrentLatitude(),
-                            driver.getCurrentLongitude()
-                    );
-
-                    return distance <= radius;
-                })
+        return nearbyDrivers.stream()
 
                 .map(driver -> DriverResponseDto.builder()
                         .id(driver.getId())
