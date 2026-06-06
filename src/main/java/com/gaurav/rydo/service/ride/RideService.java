@@ -12,6 +12,7 @@ import com.gaurav.rydo.exception.ApiException;
 import com.gaurav.rydo.repository.driver.DriverRepository;
 import com.gaurav.rydo.repository.ride.RideRepository;
 import com.gaurav.rydo.repository.user.UserRepository;
+import com.gaurav.rydo.util.DistanceCalculator;
 import com.gaurav.rydo.util.DistanceUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class RideService {
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
 
+
     @Transactional
     public RideResponseDto requestRide(
             RideRequestDto requestDto
@@ -46,44 +48,32 @@ public class RideService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        // Fetch available drivers
-        List<Driver> availableDrivers =
-                driverRepository.findByIsAvailableTrue();
-
-        // Find nearest driver
-        Driver nearestDriver = availableDrivers.stream()
-
-                .filter(driver ->
-                        driver.getCurrentLatitude() != null
-                                && driver.getCurrentLongitude() != null
-                )
-
-                .min(Comparator.comparingDouble(driver ->
-
-                        DistanceUtil.calculateDistance(
+        // Find nearest driver using PostGIS
+        Driver nearestDriver =
+                driverRepository.findNearestDriver(
                                 requestDto.getPickupLatitude(),
-                                requestDto.getPickupLongitude(),
-                                driver.getCurrentLatitude(),
-                                driver.getCurrentLongitude()
+                                requestDto.getPickupLongitude()
                         )
-                ))
-
-                .orElseThrow(() ->
-                        new RuntimeException("No nearby drivers available"));
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "No nearby drivers available"
+                                )
+                        );
 
         // Mark driver unavailable
         nearestDriver.setIsAvailable(false);
 
         driverRepository.save(nearestDriver);
 
-        // Simple fare calculation
-        double distanceInKm = DistanceUtil.calculateDistance(
+        // Calculate trip distance
+        double distanceInKm = DistanceCalculator.calculateDistance(
                 requestDto.getPickupLatitude(),
                 requestDto.getPickupLongitude(),
                 requestDto.getDropLatitude(),
                 requestDto.getDropLongitude()
         );
 
+        // Calculate fare
         double fare = distanceInKm * 15;
 
         // Create ride
@@ -105,7 +95,8 @@ public class RideService {
         return RideResponseDto.builder()
                 .rideId(savedRide.getId())
                 .riderName(
-                        rider.getFirstName() + " " + rider.getLastName()
+                        rider.getFirstName() + " "
+                                + rider.getLastName()
                 )
                 .driverName(
                         nearestDriver.getUser().getFirstName()

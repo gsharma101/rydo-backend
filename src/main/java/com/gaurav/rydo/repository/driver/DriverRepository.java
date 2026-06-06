@@ -39,4 +39,24 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
             Double longitude,
             Double radiusInMeters
     );
+
+    @Query(value = """
+    SELECT *
+    FROM drivers d
+    WHERE d.is_available = true
+    AND d.location IS NOT NULL
+    ORDER BY ST_Distance(
+        d.location::geography,
+        ST_SetSRID(
+            ST_MakePoint(:longitude, :latitude),
+            4326
+        )::geography
+    )
+    LIMIT 1
+    """,
+            nativeQuery = true)
+    Optional<Driver> findNearestDriver(
+            Double latitude,
+            Double longitude
+    );
 }
