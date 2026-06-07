@@ -11,6 +11,8 @@ import com.gaurav.rydo.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Coordinate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -162,6 +164,10 @@ public class DriverService {
                 .build();
     }
 
+    @CacheEvict(
+            value = "nearbyDrivers",
+            allEntries = true
+    )
     public DriverResponseDto updateLocation(
             DriverLocationUpdateRequestDto requestDto
     ) {
@@ -220,6 +226,10 @@ public class DriverService {
                 .build();
     }
 
+    @Cacheable(
+            value = "nearbyDrivers",
+            key = "#latitude + ':' + #longitude + ':' + #radius"
+    )
     public List<DriverResponseDto> findNearbyDrivers(
             Double latitude,
             Double longitude,
